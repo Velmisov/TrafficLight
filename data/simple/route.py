@@ -1,7 +1,7 @@
 
 def generate():
     n = 5
-    with open("simple.rou.xml", "w") as routes:
+    with open("data\simple\simple.rou.xml", "w") as routes:
         print("""<routes>
         <vType id="type1" accel="0.8" decel="4.5" sigma="0.5" length="5" maxSpeed="70" />
         <route id="route1to2" color="1,1,0" edges="1totl tlto2" />
