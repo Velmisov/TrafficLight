@@ -1,22 +1,20 @@
-
 import os
 import sys
+import subprocess
+import traci
+import data.default.route
+
 if 'SUMO_HOME' in os.environ:
     tools = os.path.join(os.environ['SUMO_HOME'], 'tools')
     sys.path.append(tools)
 else:
     sys.exit("Undeclared environment variable 'SUMO_HOME'")
 
-import data.simple.route
-
-data.simple.route.generate()
+data.default.route.generate()
 
 port = 10000
 
-import subprocess
-import traci
-
-sumoProcess = subprocess.Popen(['sumo-gui.exe', "-c", "data\simple\simple.sumocfg", "--remote-port", str(port)],
+sumoProcess = subprocess.Popen(['sumo-gui.exe', "-c", "data\default\default.sumocfg", "--remote-port", str(port)],
                                stdout=sys.stdout, stderr=sys.stderr)
 traci.init(port)
 
