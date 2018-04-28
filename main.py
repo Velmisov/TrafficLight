@@ -6,3 +6,8 @@ if 'SUMO_HOME' in os.environ:
     sys.path.append(tools)
 else:
     sys.exit("Undeclared environment variable 'SUMO_HOME'")
+
+import data.simple.route
+
+data.simple.route.generate()
+
