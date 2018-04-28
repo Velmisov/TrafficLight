@@ -3,3 +3,6 @@ env/
 
 # PyCharm folders
 .idea/
+
+# SUMO routes
+*.rou.xml
