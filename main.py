@@ -2,7 +2,7 @@ import os
 import sys
 import subprocess
 import traci
-import data.default.route
+import data.simple.route
 
 if 'SUMO_HOME' in os.environ:
     tools = os.path.join(os.environ['SUMO_HOME'], 'tools')
@@ -10,18 +10,19 @@ if 'SUMO_HOME' in os.environ:
 else:
     sys.exit("Undeclared environment variable 'SUMO_HOME'")
 
-data.default.route.generate()
+route = data.simple.route.Route(100)
 
 port = 10000
 
-sumoProcess = subprocess.Popen(['sumo-gui.exe', "-c", "data\default\default.sumocfg", "--remote-port", str(port)],
-                               stdout=sys.stdout, stderr=sys.stderr)
-traci.init(port)
+for i in range(2):
+    route.next()
+    sumoProcess = subprocess.Popen(['sumo-gui.exe', "-c", "data\simple\simple.sumocfg", "--remote-port", str(port)],
+                                   stdout=sys.stdout, stderr=sys.stderr)
+    traci.init(port)
 
-step = 0
-while traci.simulation.getMinExpectedNumber() > 0:
-    traci.simulationStep()
-    print(step)
-    step += 1
+    while traci.simulation.getMinExpectedNumber() > 0:
+        traci.simulationStep()
 
-traci.close()
+    traci.close()
+
+    port += 1
