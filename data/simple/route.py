@@ -10,6 +10,7 @@ class Route:
         self.types = ["type1", "type2"]
         self.routes = ["route1to2", "route1to4", "route2to1", "route2to3", "route3to4", "route3to1", "route4to3",
                        "route4to2"]
+        self.edges = ["1totl", "2totl", "3totl", "4totl"]
 
         xls = pd.ExcelFile("data\simple\coefficients.xlsx")
         self.data = xls.parse("Coefficients")
@@ -20,7 +21,6 @@ class Route:
 
         random.seed(7)
 
-    @staticmethod
     def __new_vehicle(self, veh_id, veh_type, route_id, depart):
         return '<vehicle id="%d" type="%s" route="%s" depart="%d" />' % \
                (veh_id, veh_type, route_id, depart)
@@ -49,7 +49,7 @@ class Route:
             for i in range(self.number):
                 for route_id in range(len(self.coefficients)):
                     if random.random() < self.coefficients[route_id]:
-                        print(Route.__new_vehicle(vehicle_id, "type2", self.routes[route_id], i), file=routes_file)
+                        print(self.__new_vehicle(vehicle_id, "type2", self.routes[route_id], i), file=routes_file)
                         vehicle_id += 1
 
             print("</routes>", file=routes_file)
