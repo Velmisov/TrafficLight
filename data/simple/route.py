@@ -10,7 +10,7 @@ class Route:
         self.types = ["type1", "type2"]
         self.routes = ["route1to2", "route1to4", "route2to1", "route2to3", "route3to4", "route3to1", "route4to3",
                        "route4to2"]
-        self.edges = ["1totl", "2totl", "3totl", "4totl"]
+        self.edges = ["1totl", "2totl", "3totl", "4totl", "tlto1", "tlto2", "tlto3", "tlto4"]
 
         xls = pd.ExcelFile("data\simple\coefficients.xlsx")
         self.data = xls.parse("Coefficients")
