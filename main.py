@@ -1,11 +1,12 @@
 import os
-import sys
 import subprocess
+import sys
+
 import traci
+
 import data.simple.route
 import outparsing
-from state import State
-import pandas as pd
+from models.qlearning.algo import QLearning
 
 if 'SUMO_HOME' in os.environ:
     tools = os.path.join(os.environ['SUMO_HOME'], 'tools')
