@@ -3,8 +3,8 @@ import sys
 import subprocess
 import traci
 import data.simple.route
-import outparsing
 from outparsing import Parser
+from state import State
 import pandas as pd
 
 if 'SUMO_HOME' in os.environ:
@@ -28,16 +28,9 @@ for i in range(1):
     # total_waiting_time = pd.DataFrame(data=[], columns=route.edges)
 
     while traci.simulation.getMinExpectedNumber() > 0:
-        current_number = {}
-        current_time = {}
-        current_total_time = {}
-        for edge in route.edges:
-            current_number[edge] = len(traci.edge.getLastStepVehicleIDs(edge))
-            current_time[edge] = traci.edge.getWaitingTime(edge)
-            # current_total_time[edge] = traci.edge.
-
-        number_of_vehicles = number_of_vehicles.append(current_number, ignore_index=True)
-        waiting_time = waiting_time.append(current_time, ignore_index=True)
+        number_of_vehicles = number_of_vehicles.append(State.get_number_of_vehicles(route.edges), ignore_index=True)
+        waiting_time = waiting_time.append(State.get_waiting_time(route.edges), ignore_index=True)
+        # total_waiting_time = total_waiting_time.append(current_total_time, ignore_index=True)
 
         traci.simulationStep()
 
