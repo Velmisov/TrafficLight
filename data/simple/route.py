@@ -16,13 +16,14 @@ class Route:
         xls.close()
         self.data.columns = ["id\\routes"]+self.routes
         self.last_coefficients_id = 0
-        self.coefficients = [0 for i in range(len(self.routes))]
+        self.coefficients = [0 for _ in range(len(self.routes))]
 
         random.seed(7)
 
-    def __new_vehicle(self, id, type, route_id, depart):
+    @staticmethod
+    def __new_vehicle(self, veh_id, veh_type, route_id, depart):
         return '<vehicle id="%d" type="%s" route="%s" depart="%d" />' % \
-               (id, type, route_id, depart)
+               (veh_id, veh_type, route_id, depart)
 
     def __next_coefficients(self):
         for i in range(len(self.routes)):
@@ -48,7 +49,7 @@ class Route:
             for i in range(self.number):
                 for route_id in range(len(self.coefficients)):
                     if random.random() < self.coefficients[route_id]:
-                        print(self.__new_vehicle(vehicle_id, "type2", self.routes[route_id], i), file=routes_file)
+                        print(Route.__new_vehicle(vehicle_id, "type2", self.routes[route_id], i), file=routes_file)
                         vehicle_id += 1
 
             print("</routes>", file=routes_file)

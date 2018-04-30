@@ -14,7 +14,7 @@ route = data.simple.route.Route(100)
 
 port = 10000
 
-for i in range(2):
+for i in range(3):
     route.next()
     sumoProcess = subprocess.Popen(['sumo-gui.exe', "-c", "data\simple\simple.sumocfg", "--remote-port", str(port)],
                                    stdout=sys.stdout, stderr=sys.stderr)
