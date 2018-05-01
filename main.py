@@ -4,9 +4,10 @@ import sys
 
 import traci
 
-import data.simple.route
-import outparsing
+from data.simple.route import Route
+from outparsing import Parser
 from models.qlearning.algo import QLearning
+import settings
 
 if 'SUMO_HOME' in os.environ:
     tools = os.path.join(os.environ['SUMO_HOME'], 'tools')
@@ -14,25 +15,26 @@ if 'SUMO_HOME' in os.environ:
 else:
     sys.exit("Undeclared environment variable 'SUMO_HOME'")
 
-route = data.simple.route.Route(100)
-parser = outparsing.Parser(route.edges)
+# q = QLearning("data\simple\simple", 0.5, 0.1)
+# q.fit(1)
 
-port = 10000
+port = 8813
 
-for i in range(2):
-    route.next()
-    sumoProcess = subprocess.Popen(['sumo.exe', "--waiting-time-memory=1000000",
-                                    "-c", "data\simple\simple.sumocfg", "--remote-port", str(port)],
-                                   stdout=sys.stdout, stderr=sys.stderr)
-    traci.init(port)
+route = Route(100)
+parser = Parser(route.edges)
 
-    while traci.simulation.getMinExpectedNumber() > 0:
-        parser.step()
-        traci.simulationStep()
+route.next()
+sumo_process = subprocess.Popen(['sumo-gui.exe', settings.WAITING_TIME_MEMORY_LIMIT,
+                                 "-c", "data\simple\simple.sumocfg", "--remote-port", str(port)],
+                                stdout=sys.stdout, stderr=sys.stderr)
+traci.init(port)
 
-    traci.close()
-    sumoProcess.kill()
+while traci.simulation.getMinExpectedNumber() > 0:
+    parser.step()
+    traci.simulationStep()
 
-    parser.get_statistics()
-    parser.clear()
-    port += 1
+traci.close()
+sumo_process.kill()
+
+parser.get_statistics()
+parser.clear()

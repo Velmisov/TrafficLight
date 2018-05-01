@@ -12,6 +12,7 @@ class Parser:
         self.waiting_time = pd.DataFrame(columns=edges)
         self.total_waiting_time = pd.DataFrame(columns=["TotalWaitingTime"])
         self.vehicles_accumulated_waiting_time = {}
+        self.halting_vehicles = pd.DataFrame(columns=["HaltingNumber"])
 
     def plot_waiting_time(self):
         self.waiting_time.groupby(self.waiting_time.index).sum().plot()
@@ -37,6 +38,14 @@ class Parser:
         plt.title("Progress of total waiting time")
         plt.show()
 
+    def plot_halting_number(self):
+        self.halting_vehicles.groupby(self.halting_vehicles.index).sum().plot()
+
+        plt.xlabel("Total time")
+        plt.ylabel("Number of halting vehicles")
+        plt.title("Progress of halting vehicles")
+        plt.show()
+
     def step(self):
         self.number_of_vehicles = self.number_of_vehicles.append(State.get_number_of_vehicles(self.edges),
                                                                  ignore_index=True)
@@ -45,19 +54,26 @@ class Parser:
         for edge in self.edges:
             for vehicle in traci.edge.getLastStepVehicleIDs(edge):
                 self.vehicles_accumulated_waiting_time[vehicle] = traci.vehicle.getAccumulatedWaitingTime(vehicle)
-        current_sum_of_waiting_time = 0.
+        sum_of_waiting_time = 0.
         for waiting_time in self.vehicles_accumulated_waiting_time.values():
-            current_sum_of_waiting_time += waiting_time
-        self.total_waiting_time = self.total_waiting_time.append({"TotalWaitingTime": current_sum_of_waiting_time},
+            sum_of_waiting_time += waiting_time
+        self.total_waiting_time = self.total_waiting_time.append({"TotalWaitingTime": sum_of_waiting_time},
                                                                  ignore_index=True)
+
+        sum_of_halting_number = 0
+        for edge in self.edges:
+            sum_of_halting_number += traci.edge.getLastStepHaltingNumber(edge)
+        self.halting_vehicles = self.halting_vehicles.append({"HaltingNumber": sum_of_halting_number}, ignore_index=True)
 
     def get_statistics(self):
         self.plot_number_of_vehicles()
         self.plot_waiting_time()
         self.plot_total_waiting_time()
+        self.plot_halting_number()
 
     def clear(self):
         self.number_of_vehicles = pd.DataFrame(columns=self.edges)
         self.waiting_time = pd.DataFrame(columns=self.edges)
         self.total_waiting_time = pd.DataFrame(columns=["TotalWaitingTime"])
         self.vehicles_accumulated_waiting_time = {}
+        self.halting_vehicles = pd.DataFrame(columns=["HaltingNumber"])
