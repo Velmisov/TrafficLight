@@ -1,23 +1,21 @@
 import random
 import pandas as pd
 
+from data.simple import info
+
 
 class Route:
 
-    def __init__(self, number):
-        self.number = number
-        self.file_name = "data\simple\simple.rou.xml"
-        self.types = ["type1", "type2"]
-        self.routes = ["route1to2", "route1to4", "route2to1", "route2to3", "route3to4", "route3to1", "route4to3",
-                       "route4to2"]
-        self.edges = ["1totl", "2totl", "3totl", "4totl", "tlto1", "tlto2", "tlto3", "tlto4"]
+    def __init__(self, number_of_vehicles):
+        self.vehicles_to_create = number_of_vehicles
+        self.file_name = info.PATH+".rou.xml"
 
         xls = pd.ExcelFile("data\simple\coefficients.xlsx")
         self.data = xls.parse("Coefficients")
         xls.close()
-        self.data.columns = ["id\\routes"]+self.routes
+        self.data.columns = ["id\\routes"]+info.ROUTES
         self.last_coefficients_id = 0
-        self.coefficients = [0 for _ in range(len(self.routes))]
+        self.coefficients = [0 for _ in range(len(info.ROUTES))]
 
         random.seed(7)
 
@@ -26,8 +24,8 @@ class Route:
                (veh_id, veh_type, route_id, depart)
 
     def __next_coefficients(self):
-        for i in range(len(self.routes)):
-            self.coefficients[i] = self.data[self.routes[i]][self.last_coefficients_id]
+        for i in range(len(info.ROUTES)):
+            self.coefficients[i] = self.data[info.ROUTES[i]][self.last_coefficients_id]
         self.last_coefficients_id += 1
 
     def next(self):
@@ -46,10 +44,10 @@ class Route:
             <route id="route4to2" edges="4totl tlto2" />''', file=routes_file)
 
             vehicle_id = 0
-            for i in range(self.number):
+            for i in range(self.vehicles_to_create):
                 for route_id in range(len(self.coefficients)):
                     if random.random() < self.coefficients[route_id]:
-                        print(self.__new_vehicle(vehicle_id, "type2", self.routes[route_id], i), file=routes_file)
+                        print(self.__new_vehicle(vehicle_id, "type2", info.ROUTES[route_id], i), file=routes_file)
                         vehicle_id += 1
 
             print("</routes>", file=routes_file)
