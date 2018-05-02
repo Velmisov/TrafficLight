@@ -18,7 +18,7 @@ class QLearning:
         self.q_value = pd.DataFrame(columns=range(settings.MIN_GREEN_TIME, settings.MAX_GREEN_TIME))
 
         self.discrete_state = DiscreteState(info, route)
-        self.discrete_state.fit(1)
+        self.discrete_state.fit(20)
 
     def __print_q(self):
         print(self.q_value)
