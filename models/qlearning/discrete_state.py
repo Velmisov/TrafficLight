@@ -18,6 +18,15 @@ class DiscreteState:
         self.route = route
         self.cluster = {}
         self.number_of_clusters = 20
+        self.actually_state = {}
+
+    def __make_actually_states(self):
+        current_state = 0
+        for phase in self.info.GREEN_PHASES:
+            self.actually_state[phase] = {}
+            for state in range(self.number_of_clusters):
+                self.actually_state[phase][state] = current_state
+                current_state += 1
 
     def fit(self, number_of_days):
         if Path(self.info.DIR+"cluster").is_dir():
@@ -28,6 +37,7 @@ class DiscreteState:
             if ok:
                 for phase in self.info.GREEN_PHASES:
                     self.cluster[phase] = pickle.load(open(self.info.DIR+"cluster\phase"+str(phase)+".sav", "rb"))
+                self.__make_actually_states()
                 return
 
         data = {}
@@ -93,6 +103,8 @@ class DiscreteState:
             self.cluster[phase].fit(data[phase])
             pickle.dump(self.cluster[phase], open(self.info.DIR+"cluster\phase"+str(phase)+".sav", "wb"))
 
+        self.__make_actually_states()
+
     def get_state(self, phase, queue, waiting, vehicles):
         state = []
         for edge in self.info.EDGES:
@@ -102,4 +114,4 @@ class DiscreteState:
         for edge in self.info.EDGES:
             state.append(vehicles[edge])
         state = np.array(state)
-        return self.cluster[phase].predict(state.reshape(1, -1))[0]
+        return self.actually_state[phase][self.cluster[phase].predict(state.reshape(1, -1))[0]]
