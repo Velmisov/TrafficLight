@@ -19,6 +19,7 @@ class DiscreteState:
         self.cluster = {}
         self.number_of_clusters = 20
         self.actually_state = {}
+        self.total_number_of_states = 0
 
     def __make_actually_states(self):
         current_state = 0
@@ -27,6 +28,7 @@ class DiscreteState:
             for state in range(self.number_of_clusters):
                 self.actually_state[phase][state] = current_state
                 current_state += 1
+        self.total_number_of_states = current_state
 
     def fit(self, number_of_days):
         if Path(self.info.DIR+"cluster").is_dir():
