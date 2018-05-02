@@ -5,20 +5,20 @@ import pandas as pd
 import traci
 
 import settings
-from data.simple.route import Route
 from models.qlearning.discrete_state import DiscreteState
 
 
 class QLearning:
 
-    def __init__(self, info, learning_rate: float, discount_factor: float):
-        self.path = info.PATH
+    def __init__(self, info, route, learning_rate: float, discount_factor: float):
+        self.info = info
+        self.route = route
         self.learning_rate = learning_rate
         self.discount_factor = discount_factor
         self.q_value = pd.DataFrame(columns=range(settings.MIN_GREEN_TIME, settings.MAX_GREEN_TIME))
 
-        self.discrete_state = DiscreteState(info)
-        self.discrete_state.fit(10)
+        self.discrete_state = DiscreteState(info, route)
+        self.discrete_state.fit(1)
 
     def __print_q(self):
         print(self.q_value)
@@ -34,21 +34,20 @@ class QLearning:
         return self.__reward(state, action)
 
     def fit(self, number_of_days: int):
-        self.__print_q()
-        port = 8813
-        route = Route(settings.CARS_IN_DAY)
-        for day in range(number_of_days):
-            route.next()
-            sumo_process = subprocess.Popen(['sumo.exe', settings.WAITING_TIME_MEMORY_LIMIT,
-                                             "-c", self.path+".sumocfg", "--remote-port", str(port)],
-                                            stdout=sys.stdout, stderr=sys.stderr)
-            traci.init(port)
-
-            while traci.simulation.getMinExpectedNumber() > 0:
-                traci.simulationStep()
-
-            traci.close()
-            sumo_process.kill()
+        pass
+        # port = 8813
+        # for day in range(number_of_days):
+        #     self.route.next()
+        #     sumo_process = subprocess.Popen(['sumo.exe', settings.WAITING_TIME_MEMORY_LIMIT,
+        #                                      "-c", self.info.PATH+".sumocfg", "--remote-port", str(port)],
+        #                                     stdout=sys.stdout, stderr=sys.stderr)
+        #     traci.init(port)
+        #
+        #     while traci.simulation.getMinExpectedNumber() > 0:
+        #         traci.simulationStep()
+        #
+        #     traci.close()
+        #     sumo_process.kill()
 
     def predict(self) -> int:
         pass

@@ -16,7 +16,7 @@ if 'SUMO_HOME' in os.environ:
 else:
     sys.exit("Undeclared environment variable 'SUMO_HOME'")
 
-q = QLearning(info, 0.5, 0.1)
+q = QLearning(info, Route(settings.CARS_IN_DAY * 10), 0.5, 0.1)
 q.fit(1)
 
 # port = 8813
