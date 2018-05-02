@@ -14,7 +14,6 @@ class Route:
         self.data = xls.parse("Coefficients")
         xls.close()
         self.data.columns = ["id\\routes"]+info.ROUTES
-        self.last_coefficients_id = 0
         self.coefficients = [0 for _ in range(len(info.ROUTES))]
 
         random.seed(7)
@@ -24,9 +23,9 @@ class Route:
                (veh_id, veh_type, route_id, depart)
 
     def __next_coefficients(self):
+        coefficients_id = random.randint(0, 9)
         for i in range(len(info.ROUTES)):
-            self.coefficients[i] = self.data[info.ROUTES[i]][self.last_coefficients_id]
-        self.last_coefficients_id += 1
+            self.coefficients[i] = self.data[info.ROUTES[i]][coefficients_id]
 
     def next(self):
         self.__next_coefficients()
