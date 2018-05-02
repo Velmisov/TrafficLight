@@ -1,5 +1,6 @@
 import random
 import pandas as pd
+import numpy as np
 
 from data.simple import info
 
@@ -14,13 +15,16 @@ class Route:
         self.data = xls.parse("Coefficients")
         xls.close()
         self.data.columns = ["id\\routes"]+info.ROUTES
-        self.coefficients = [0 for _ in range(len(info.ROUTES))]
+        self.coefficients = [0] * len(info.ROUTES)
 
-        random.seed(7)
+        # random.seed(7)
 
     def __new_vehicle(self, veh_id, veh_type, route_id, depart):
         return '<vehicle id="%d" type="%s" route="%s" depart="%d" />' % \
                (veh_id, veh_type, route_id, depart)
+
+    def set_coefficients(self, coefficients):
+        self.coefficients = coefficients
 
     def __next_coefficients(self):
         coefficients_id = random.randint(0, 9)
@@ -28,7 +32,8 @@ class Route:
             self.coefficients[i] = self.data[info.ROUTES[i]][coefficients_id]
 
     def next(self):
-        self.__next_coefficients()
+        if np.sum(self.coefficients) == 0:
+            self.__next_coefficients()
         with open(self.file_name, "w") as routes_file:
             print('''<routes>
             <vType id="type1" accel="0.8" decel="4.5" sigma="0.5" length="5" maxSpeed="70" />
@@ -50,3 +55,4 @@ class Route:
                         vehicle_id += 1
 
             print("</routes>", file=routes_file)
+        self.coefficients = [0] * len(info.ROUTES)
