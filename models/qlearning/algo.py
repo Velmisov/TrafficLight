@@ -120,3 +120,9 @@ class QLearning:
         if type(arg_max_array) == np.int64:
             arg_max_array = [arg_max_array]
         return self.actions[arg_max_array[random.randint(0, len(arg_max_array) - 1)]]
+
+    def save(self, dir='./models/qlearning/saved/', fname='last.csv'):
+        self.q_value.tofile(dir+fname, sep=',')
+
+    def load(self, dir='./models/qlearning/saved/', fname='last.csv'):
+        self.q_value = np.fromfile(dir+fname, sep=',').reshape(self.q_value.shape)
