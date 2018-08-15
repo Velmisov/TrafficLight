@@ -17,8 +17,8 @@ else:
     sys.exit("Undeclared environment variable 'SUMO_HOME'")
 
 q = QLearning(info, Route(settings.CARS_IN_DAY * 6), 0.95)
-# q.fit(3)
-q.load()
+q.fit(5)
+q.save()
 
 
 def do(coefs):
@@ -27,7 +27,7 @@ def do(coefs):
 
     port = 8814
 
-    parser = Parser(info.EDGES)
+    parser = Parser(info.EDGES_TO)
 
     route.next()
     sumo_process = subprocess.Popen(['sumo-gui.exe', settings.WAITING_TIME_MEMORY_LIMIT,
@@ -50,7 +50,7 @@ def do(coefs):
 
         if current_phase in info.GREEN_PHASES and time_current_phase == 0:
 
-            for edge in info.EDGES:
+            for edge in info.EDGES_TO:
                 queue_tracker[edge] = traci.edge.getLastStepHaltingNumber(edge)
                 waiting_tracker[edge] = traci.edge.getWaitingTime(edge)
                 vehicles_tracker[edge] = traci.edge.getLastStepVehicleNumber(edge)

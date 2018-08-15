@@ -17,9 +17,9 @@ class QLearning:
         self.discount_factor = discount_factor
 
         self.discrete_state = DiscreteState(info, route)
-        self.discrete_state.fit(20)
+        self.discrete_state.fit(44)
 
-        self.actions = [settings.MIN_GREEN_TIME, 10, 15, 20, 25, 30, 35, settings.MAX_GREEN_TIME]
+        self.actions = [settings.MIN_GREEN_TIME, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, settings.MAX_GREEN_TIME]
 
         self.q_value = np.zeros((self.discrete_state.total_number_of_states, len(self.actions)))
         self.counts = np.zeros((self.discrete_state.total_number_of_states, len(self.actions)))
@@ -45,7 +45,7 @@ class QLearning:
         queue_tracker = {}
         waiting_tracker = {}
         vehicles_tracker = {}
-        for edge in self.info.EDGES:
+        for edge in self.info.EDGES_TO:
             queue_tracker[edge] = 0
             waiting_tracker[edge] = 0
             vehicles_tracker[edge] = 0
@@ -78,7 +78,7 @@ class QLearning:
 
                 if current_phase in self.info.GREEN_PHASES and time_current_phase == 0:
 
-                    for edge in self.info.EDGES:
+                    for edge in self.info.EDGES_TO:
                         queue_tracker[edge] = traci.edge.getLastStepHaltingNumber(edge)
                         waiting_tracker[edge] = traci.edge.getWaitingTime(edge)
                         vehicles_tracker[edge] = traci.edge.getLastStepVehicleNumber(edge)

@@ -17,7 +17,7 @@ class DiscreteState:
         self.info = info
         self.route = route
         self.cluster = {}
-        self.number_of_clusters = 20
+        self.number_of_clusters = 50
         self.actually_state = {}
         self.total_number_of_states = 0
 
@@ -49,7 +49,7 @@ class DiscreteState:
         queue_tracker = {}
         waiting_tracker = {}
         vehicles_tracker = {}
-        for edge in self.info.EDGES:
+        for edge in self.info.EDGES_TO:
             queue_tracker[edge] = 0
             waiting_tracker[edge] = 0
             vehicles_tracker[edge] = 0
@@ -75,17 +75,17 @@ class DiscreteState:
 
                 if current_phase in self.info.GREEN_PHASES and time_current_phase == 0:
 
-                    for edge in self.info.EDGES:
+                    for edge in self.info.EDGES_TO:
                         queue_tracker[edge] = traci.edge.getLastStepHaltingNumber(edge)
                         waiting_tracker[edge] = traci.edge.getWaitingTime(edge)
                         vehicles_tracker[edge] = traci.edge.getLastStepVehicleNumber(edge)
 
                     new_data = []
-                    for edge in self.info.EDGES:
+                    for edge in self.info.EDGES_TO:
                         new_data.append(queue_tracker[edge])
-                    for edge in self.info.EDGES:
+                    for edge in self.info.EDGES_TO:
                         new_data.append(waiting_tracker[edge])
-                    for edge in self.info.EDGES:
+                    for edge in self.info.EDGES_TO:
                         new_data.append(vehicles_tracker[edge])
 
                     if len(data[current_phase]) == 0:
@@ -109,11 +109,11 @@ class DiscreteState:
 
     def get_state(self, phase, queue, waiting, vehicles):
         state = []
-        for edge in self.info.EDGES:
+        for edge in self.info.EDGES_TO:
             state.append(queue[edge])
-        for edge in self.info.EDGES:
+        for edge in self.info.EDGES_TO:
             state.append(waiting[edge])
-        for edge in self.info.EDGES:
+        for edge in self.info.EDGES_TO:
             state.append(vehicles[edge])
         state = np.array(state)
         return self.actually_state[phase][self.cluster[phase].predict(state.reshape(1, -1))[0]]

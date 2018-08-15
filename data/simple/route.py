@@ -27,7 +27,7 @@ class Route:
         self.coefficients = coefficients
 
     def __next_coefficients(self):
-        coefficients_id = random.randint(0, 9)
+        coefficients_id = random.randint(0, 14)
         for i in range(len(info.ROUTES)):
             self.coefficients[i] = self.data[info.ROUTES[i]][coefficients_id]
 
