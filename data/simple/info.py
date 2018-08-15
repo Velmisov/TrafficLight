@@ -1,6 +1,7 @@
 PATH = "data\simple\simple"
 DIR = "data\simple\\"
 EDGES = ["1totl", "2totl", "3totl", "4totl", "tlto1", "tlto2", "tlto3", "tlto4"]
+EDGES_TO = ["1totl", "2totl", "3totl", "4totl"]
 ROUTES = ["route1to2", "route1to4", "route2to1", "route2to3", "route3to4", "route3to1", "route4to3", "route4to2"]
 TYPES = ["type1", "type2"]
 TL = "tl"
