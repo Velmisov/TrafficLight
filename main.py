@@ -17,7 +17,7 @@ else:
     sys.exit("Undeclared environment variable 'SUMO_HOME'")
 
 q = QLearning(info, Route(settings.CARS_IN_DAY * 6), 0.95)
-q.fit(5)
+q.fit(10)
 q.save()
 
 

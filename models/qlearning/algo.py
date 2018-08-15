@@ -19,11 +19,12 @@ class QLearning:
         self.discrete_state = DiscreteState(info, route)
         self.discrete_state.fit(44)
 
-        self.actions = [settings.MIN_GREEN_TIME, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, settings.MAX_GREEN_TIME]
+        self.actions = [settings.MIN_GREEN_TIME, 10, 15, 20, 25, 30, 35, 40, 45, 50]
 
         self.q_value = np.zeros((self.discrete_state.total_number_of_states, len(self.actions)))
         self.counts = np.zeros((self.discrete_state.total_number_of_states, len(self.actions)))
         self.learning_rate = np.ones((self.discrete_state.total_number_of_states, len(self.actions)))
+        self.probs = np.ones((self.discrete_state.total_number_of_states, len(self.actions))) / len(self.actions)
 
     def compute_reward(self, queue_tracker, waiting_tracker):
         reward = 0
@@ -35,9 +36,20 @@ class QLearning:
         prev_q = self.q_value[state, action]
         self.q_value[state, action] = (1 - self.learning_rate[state, action]) * prev_q + \
                                       self.learning_rate[state, action] * (reward + self.discount_factor *
-                                                                     max(self.q_value[next_state, :] - prev_q))
+                                                                     max(self.q_value[next_state, :]))
         self.counts[state, action] += 1
         self.learning_rate[state, action] = 1 / self.counts[state, action]
+
+    def update_probs(self, state, action):
+        if np.sum(self.counts[state,]) == 0 or np.sum(self.q_value[state,]) == 0:
+            tau = 1
+        else:
+            tau = (-(np.mean(self.q_value[state,])))/(np.mean(self.counts[state,]))
+
+        numerator = np.exp(self.q_value[state,]/tau)
+        tempSum = np.sum(numerator)
+        denominator = np.array([tempSum] * len(self.actions))
+        self.probs[state,] = np.divide(numerator, denominator)
 
     def fit(self, number_of_days: int):
         port = 8813
@@ -50,7 +62,6 @@ class QLearning:
             waiting_tracker[edge] = 0
             vehicles_tracker[edge] = 0
 
-        temperature = 1.
         for day in range(number_of_days):
             self.route.set_coefficients([0.1, 0.1, 0.1, 0.1, 0.02, 0.02, 0.02, 0.02])
             self.route.next()
@@ -89,22 +100,30 @@ class QLearning:
 
                     if step != 0:
                         self.update(last_state, current_state, last_action, last_reward)
+                        self.update_probs(last_state, last_action)
 
-                    if random.random() < temperature or np.sum(self.q_value[current_state, :]) == 0:
-                        current_action = random.randint(0, self.q_value.shape[1] - 1)
-                    else:
-                        arg_max_array = np.argmax(self.q_value[current_state])
-                        if type(arg_max_array) == np.int64:
-                            arg_max_array = [arg_max_array]
-                        else:
-                            print(arg_max_array)
-                        current_action = arg_max_array[random.randint(0, len(arg_max_array) - 1)]
+                        unigen = random.random()
+                        probsActions = np.cumsum(self.probs[current_state,])
+
+                        for i in range(len(probsActions)):
+                            if unigen <= probsActions[i]:
+                                current_action = i
+                                break
+
+                    # if random.random() < temperature or np.sum(self.q_value[current_state, :]) == 0:
+                    #     current_action = random.randint(0, self.q_value.shape[1] - 1)
+                    # else:
+                    #     arg_max_array = np.argmax(self.q_value[current_state])
+                    #     if type(arg_max_array) == np.int64:
+                    #         arg_max_array = [arg_max_array]
+                    #     else:
+                    #         print(arg_max_array)
+                    #     current_action = arg_max_array[random.randint(0, len(arg_max_array) - 1)]
 
                     traci.trafficlight.setPhaseDuration(self.info.TL, self.actions[current_action])
                     last_state = current_state
                     last_action = current_action
                     last_reward = current_reward
-                    temperature = max(0.01, temperature - 0.001)
 
                 traci.simulationStep()
                 step += 1
@@ -112,7 +131,6 @@ class QLearning:
             traci.close()
             sumo_process.kill()
         print(self.q_value)
-        print(temperature)
 
     def predict(self, phase, queue, waiting, vehicles) -> int:
         state = self.discrete_state.get_state(phase, queue, waiting, vehicles)
