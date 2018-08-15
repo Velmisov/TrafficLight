@@ -16,11 +16,11 @@ if 'SUMO_HOME' in os.environ:
 else:
     sys.exit("Undeclared environment variable 'SUMO_HOME'")
 
-q = QLearning(info, Route(settings.CARS_IN_DAY * 30), 0.8, 0.1)
-q.fit(1)
+q = QLearning(info, Route(settings.CARS_IN_DAY * 6), 0.95)
+q.fit(5)
 
 route = Route(settings.CARS_IN_DAY)
-route.set_coefficients([0.25, 0.25, 0.25, 0.25, 0., 0., 0., 0.])
+route.set_coefficients([0.1, 0.1, 0.1, 0.1, 0.02, 0.02, 0.02, 0.02])
 port = 8814
 
 parser = Parser(info.EDGES)
@@ -51,8 +51,10 @@ while traci.simulation.getMinExpectedNumber() > 0:
             waiting_tracker[edge] = traci.edge.getWaitingTime(edge)
             vehicles_tracker[edge] = traci.edge.getLastStepVehicleNumber(edge)
 
-        traci.trafficlight.setPhaseDuration(info.TL, q.predict(current_phase, queue_tracker, waiting_tracker,
-                                                               vehicles_tracker))
+        time_duration = q.predict(current_phase, queue_tracker, waiting_tracker, vehicles_tracker)
+        traci.trafficlight.setPhaseDuration(info.TL, time_duration)
+        print(current_phase, time_duration)
+
     parser.step()
     traci.simulationStep()
     step += 1

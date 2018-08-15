@@ -11,31 +11,33 @@ from models.qlearning.discrete_state import DiscreteState
 
 class QLearning:
 
-    def __init__(self, info, route, learning_rate: float, discount_factor: float):
+    def __init__(self, info, route, discount_factor: float):
         self.info = info
         self.route = route
-        self.learning_rate = learning_rate
         self.discount_factor = discount_factor
 
         self.discrete_state = DiscreteState(info, route)
         self.discrete_state.fit(20)
 
-        self.q_value = np.zeros((self.discrete_state.total_number_of_states,
-                                 settings.MAX_GREEN_TIME - settings.MIN_GREEN_TIME))
+        self.actions = [settings.MIN_GREEN_TIME, 10, 15, 20, 25, 30, 35, settings.MAX_GREEN_TIME]
 
-    def __print_q(self):
-        print(self.q_value)
+        self.q_value = np.zeros((self.discrete_state.total_number_of_states, len(self.actions)))
+        self.counts = np.zeros((self.discrete_state.total_number_of_states, len(self.actions)))
+        self.learning_rate = np.ones((self.discrete_state.total_number_of_states, len(self.actions)))
 
-    def __compute_reward(self, queue_tracker, waiting_tracker):
+    def compute_reward(self, queue_tracker, waiting_tracker):
         reward = 0
-        for edge in self.info.EDGES:
+        for edge in self.info.EDGES_TO:
             reward -= ((1 * queue_tracker[edge]) ** 1.75 + (2 * waiting_tracker[edge]) ** 1.75)
         return reward
 
-    def __update(self, state, next_state, action, reward):
+    def update(self, state, next_state, action, reward):
         prev_q = self.q_value[state, action]
-        self.q_value[state, action] = prev_q + self.learning_rate * (reward + self.discount_factor *
+        self.q_value[state, action] = (1 - self.learning_rate[state, action]) * prev_q + \
+                                      self.learning_rate[state, action] * (reward + self.discount_factor *
                                                                      max(self.q_value[next_state, :] - prev_q))
+        self.counts[state, action] += 1
+        self.learning_rate[state, action] = 1 / self.counts[state, action]
 
     def fit(self, number_of_days: int):
         port = 8813
@@ -50,9 +52,9 @@ class QLearning:
 
         temperature = 1.
         for day in range(number_of_days):
-            self.route.set_coefficients([0.25, 0.25, 0.25, 0.25, 0., 0., 0., 0.])
+            self.route.set_coefficients([0.1, 0.1, 0.1, 0.1, 0.02, 0.02, 0.02, 0.02])
             self.route.next()
-            sumo_process = subprocess.Popen(['sumo-gui.exe', settings.WAITING_TIME_MEMORY_LIMIT,
+            sumo_process = subprocess.Popen(['sumo.exe', settings.WAITING_TIME_MEMORY_LIMIT,
                                              "-c", self.info.PATH+".sumocfg", "--remote-port", str(port)],
                                             stdout=sys.stdout, stderr=sys.stderr)
             traci.init(port)
@@ -83,10 +85,10 @@ class QLearning:
 
                     current_state = self.discrete_state.get_state(current_phase, queue_tracker, waiting_tracker,
                                                                   vehicles_tracker)
-                    current_reward = self.__compute_reward(queue_tracker, waiting_tracker)
+                    current_reward = self.compute_reward(queue_tracker, waiting_tracker)
 
                     if step != 0:
-                        self.__update(last_state, current_state, last_action, last_reward)
+                        self.update(last_state, current_state, last_action, last_reward)
 
                     if random.random() < temperature or np.sum(self.q_value[current_state, :]) == 0:
                         current_action = random.randint(0, self.q_value.shape[1] - 1)
@@ -98,7 +100,7 @@ class QLearning:
                             print(arg_max_array)
                         current_action = arg_max_array[random.randint(0, len(arg_max_array) - 1)]
 
-                    traci.trafficlight.setPhaseDuration(self.info.TL, settings.MIN_GREEN_TIME + current_action)
+                    traci.trafficlight.setPhaseDuration(self.info.TL, self.actions[current_action])
                     last_state = current_state
                     last_action = current_action
                     last_reward = current_reward
@@ -117,4 +119,4 @@ class QLearning:
         arg_max_array = np.argmax(self.q_value[state])
         if type(arg_max_array) == np.int64:
             arg_max_array = [arg_max_array]
-        return arg_max_array[random.randint(0, len(arg_max_array) - 1)]
+        return self.actions[arg_max_array[random.randint(0, len(arg_max_array) - 1)]]
