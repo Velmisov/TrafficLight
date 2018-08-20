@@ -16,10 +16,10 @@ if 'SUMO_HOME' in os.environ:
 else:
     sys.exit("Undeclared environment variable 'SUMO_HOME'")
 
-q = QLearning(info, Route(settings.CARS_IN_DAY * 6), 0.95)
+q = QLearning(info, Route(settings.CARS_IN_DAY), 0.95)
 # q.fit(10)
-# q.save()
-q.load()
+# q.save(fname='0.07-0.07.csv')
+q.load(fname='0.1-0.csv')
 
 
 def do(coefs):
@@ -72,5 +72,5 @@ def do(coefs):
     parser.clear()
 
 
-do([0.1, 0.1, 0.1, 0.1, 0.02, 0.02, 0.02, 0.02])
+do([0.1, 0.1, 0.1, 0.1, 0., 0., 0., 0.])
 # do([0.02, 0.02, 0.02, 0.02, 0.1, 0.1, 0.1, 0.1])
