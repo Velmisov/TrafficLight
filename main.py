@@ -17,8 +17,9 @@ else:
     sys.exit("Undeclared environment variable 'SUMO_HOME'")
 
 q = QLearning(info, Route(settings.CARS_IN_DAY * 6), 0.95)
-q.fit(10)
-q.save()
+# q.fit(10)
+# q.save()
+q.load()
 
 
 def do(coefs):
@@ -59,7 +60,7 @@ def do(coefs):
             traci.trafficlight.setPhaseDuration(info.TL, time_duration)
             print(current_phase, time_duration)
 
-        parser.step()
+        parser.step_check()
         traci.simulationStep()
         step += 1
         sec_in_phase += 1
@@ -67,7 +68,7 @@ def do(coefs):
     traci.close()
     sumo_process.kill()
 
-    parser.get_statistics()
+    parser.get_statistics_check()
     parser.clear()
 
 
