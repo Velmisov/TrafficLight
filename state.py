@@ -17,6 +17,14 @@ class State:
         return waiting_time
 
     @staticmethod
+    def get_sum_waiting_time(edges):
+        result = 0.
+        for edge in edges:
+            for vehicle in traci.edge.getLastStepVehicleIDs(edge):
+                result += traci.vehicle.getAccumulatedWaitingTime(vehicle)
+        return result
+
+    @staticmethod
     def get_number_of_vehicles(edges):
         number = {}
         for edge in edges:
